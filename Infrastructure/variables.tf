@@ -62,6 +62,11 @@ variable "ssh_public_key" {
   default = "~/.ssh/k8s_key.pub"
 }
 
+variable "ssh_private_key_path" {
+  type    = string
+  default = "~/.ssh/k8s_key"
+}
+
 variable "username" {
   type    = string
   default = "user_admin"

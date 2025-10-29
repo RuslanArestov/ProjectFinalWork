@@ -12,7 +12,7 @@ backend "s3" {
       s3 = "https://storage.yandexcloud.net"
     }
     region = "ru-central1"
-    key    = "inftastructure/state/main.tfstate"
+    key    = "infrastructure/state/main.tfstate"
     skip_region_validation      = true
     skip_credentials_validation = true
     skip_requesting_account_id  = true

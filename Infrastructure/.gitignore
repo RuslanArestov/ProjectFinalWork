@@ -16,3 +16,9 @@ secrets.auto.tfvars
 
 #config kubectl
 kubeconfig.yaml
+
+#cloud init
+cloud-ini*
+*.yml
+
+./kube/config

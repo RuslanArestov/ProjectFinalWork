@@ -1,0 +1,25 @@
+#cloud-config
+users:
+  - name: ${username}
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    shell: /bin/bash
+    ssh-authorized-keys:
+      - ${ssh_public_key}
+
+package_update: true
+package_upgrade: true
+
+runcmd:
+  # Включаем IP форвардинг
+  - sysctl -w net.ipv4.ip_forward=1
+  - sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
+  - sysctl -p
+
+  # Разрешаем маршрутизацию и NAT через eth0
+  - iptables -P FORWARD ACCEPT
+  - iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+  # Сохраняем правила iptables
+  - apt-get install -y iptables-persistent
+  - netfilter-persistent save

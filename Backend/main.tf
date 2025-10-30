@@ -46,6 +46,30 @@ resource "yandex_resourcemanager_folder_iam_member" "sa-infra_iam_admin" {
   folder_id = var.folder_id
 }
 
+resource "yandex_resourcemanager_folder_iam_member" "sa-infra_container_registry_admin" {
+  role      = "container-registry.admin"           
+  member    = "serviceAccount:${yandex_iam_service_account.sa-infra.id}"
+  folder_id = var.folder_id
+}
+
+resource "yandex_resourcemanager_folder_iam_member" "sa-infra_container_registry_images_scanner" {
+  folder_id   = var.folder_id
+  role        = "container-registry.images.scanner"
+  member      = "serviceAccount:${yandex_iam_service_account.sa-infra.id}"
+}
+
+resource "yandex_resourcemanager_folder_iam_member" "sa-infra_functions_functionInvoker" {
+  folder_id   = var.folder_id
+  role        = "functions.functionInvoker"
+  member      = "serviceAccount:${yandex_iam_service_account.sa-infra.id}"
+}
+
+resource "yandex_resourcemanager_folder_iam_member" "sa-infra_functions_function_admin" {
+  folder_id   = var.folder_id
+  role        = "functions.admin"
+  member      = "serviceAccount:${yandex_iam_service_account.sa-infra.id}"
+}
+
 resource "yandex_iam_service_account_static_access_key" "sa-infra_key" {
   service_account_id = yandex_iam_service_account.sa-infra.id
   depends_on = [yandex_iam_service_account.sa-infra]
@@ -92,4 +116,23 @@ resource "yandex_storage_bucket_iam_binding" "sa-admins" {
               "serviceAccount:${yandex_iam_service_account.sa-infra.id}"
             ]
   depends_on = [yandex_storage_bucket.tf_state]          
+}
+
+resource "yandex_iam_service_account_key" "sa_infra_json_key" {
+  service_account_id = yandex_iam_service_account.sa-infra.id
+  description        = "Terraform key for infra"
+  key_algorithm      = "RSA_4096"
+}
+
+# Формирую правильное содержание авторизованного ключа для infra-sa
+resource "local_file" "sa_key_json" {
+  content = templatefile("${path.module}/key.json.tpl", {
+    id                 = yandex_iam_service_account_key.sa_infra_json_key.id
+    service_account_id = yandex_iam_service_account_key.sa_infra_json_key.service_account_id
+    created_at         = yandex_iam_service_account_key.sa_infra_json_key.created_at
+    key_algorithm      = yandex_iam_service_account_key.sa_infra_json_key.key_algorithm
+    public_key         = replace(chomp(yandex_iam_service_account_key.sa_infra_json_key.public_key), "\n", "\\n")
+    private_key        = replace(chomp(yandex_iam_service_account_key.sa_infra_json_key.private_key), "\n", "\\n")
+  })
+  filename = "../Infrastructure/key.json"
 }

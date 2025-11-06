@@ -23,3 +23,11 @@ runcmd:
   # Сохраняем правила iptables
   - apt-get install -y iptables-persistent
   - netfilter-persistent save
+
+  # Базовые пакеты
+  - apt-get update
+  - apt-get install -y python3 python3.10-venv python3-pip git
+
+  # Обновление pip и установка ansible
+  - pip3 install --upgrade pip
+  - pip3 install "ansible-core>=2.17.3,<2.18"

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-app
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-app
+  template:
+    metadata:
+      labels:
+        app: nginx-app
+    spec:                        
+      serviceAccountName: ycr-sa
+      containers:
+      - name: nginx-app
+        image: cr.yandex/crpteen2qcid9hpv7816/nginx-app:latest
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+        - name: ycr-secret

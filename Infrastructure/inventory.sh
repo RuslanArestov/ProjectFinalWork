@@ -2,8 +2,8 @@
 set -e
 
 # Получаем значения outputов из Terraform
-masters=$(terraform output -json master_private_ips | jq -r '.value[]')
-workers=$(terraform output -json worker_private_ips | jq -r '.value[]')
+masters=$(terraform output -json master_private_ips | jq -r '.[]')
+workers=$(terraform output -json worker_private_ips | jq -r '.[]')
 user=$(terraform output -raw ssh_user)
 key_path=$(terraform output -raw ssh_private_key_path)
 
@@ -21,7 +21,7 @@ echo -e "\n[etcd:children]\nkube_control_plane" >> $inventory_file
 echo -e "\n[kube_node]" >> $inventory_file
 i=1
 for ip in $workers; do
-  echo "node${i} ansible_host=${ip} ip=${ip}" >> $inventory_file
+  echo "worker${i} ansible_host=${ip} ip=${ip}" >> $inventory_file
   ((i++))
 done
 
@@ -32,4 +32,4 @@ ansible_user=${user}
 ansible_ssh_private_key_file=${key_path}
 EOF
 
-echo "✅ Inventory успешно сгенерирован: ${inventory_file}"
+echo "Inventory успешно сгенерирован: ${inventory_file}"

@@ -95,30 +95,30 @@ resource "yandex_vpc_security_group" "k8s_sg" {
   }
 }
 
-# resource "yandex_vpc_security_group" "alb_sg" {
-#   name       = "alb-sg"
-#   network_id = yandex_vpc_network.k8s-network.id
+resource "yandex_vpc_security_group" "alb_sg" {
+  name       = "alb-sg"
+  network_id = yandex_vpc_network.k8s-network.id
 
 
-#   ingress {
-#     protocol       = "TCP"
-#     port           = 80
-#     v4_cidr_blocks = ["0.0.0.0/0"]
-#   }
+  ingress {
+    protocol       = "TCP"
+    port           = 80
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
 
-#   ingress {
-#     protocol       = "TCP"
-#     port           = 30080
-#     v4_cidr_blocks = ["198.18.235.0/24", "198.18.248.0/24"]
-#   }
+  ingress {
+    protocol       = "TCP"
+    port           = 30080
+    v4_cidr_blocks = ["198.18.235.0/24", "198.18.248.0/24"]
+  }
 
-#   egress {
-#     protocol       = "ANY"
-#     from_port      = 0
-#     to_port        = 65535
-#     v4_cidr_blocks = ["0.0.0.0/0"]
-#   }
-# }
+  egress {
+    protocol       = "ANY"
+    from_port      = 0
+    to_port        = 65535
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 
 data "yandex_compute_image" "ubuntu" {
   family = "ubuntu-2204-lts"
@@ -253,75 +253,75 @@ resource "yandex_compute_instance_group" "worker" {
   }
 }
 
-# # resource "yandex_alb_backend_group" "k8s_backend" {
-# #   name = "k8s-backend-group"
+resource "yandex_alb_backend_group" "k8s_backend" {
+  name = "k8s-backend-group"
 
-# #   http_backend {
-# #     name   = "k8s-http-backend"
-# #     weight = 1
-# #     port   = 30080
+  http_backend {
+    name   = "k8s-http-backend"
+    weight = 1
+    port   = 30080
 
-# #     target_group_ids = [yandex_compute_instance_group.worker.application_load_balancer[0].target_group_id]
+    target_group_ids = [yandex_compute_instance_group.worker.application_load_balancer[0].target_group_id]
 
     
-# #     healthcheck {
-# #       timeout             = "10s"
-# #       interval            = "5s"
-# #       healthy_threshold   = 3
-# #       unhealthy_threshold = 3
-# #       http_healthcheck {
-# #         path = "/"
-# #       }
-# #     }
-# #   }
-# # }
+    healthcheck {
+      timeout             = "10s"
+      interval            = "5s"
+      healthy_threshold   = 3
+      unhealthy_threshold = 3
+      http_healthcheck {
+        path = "/"
+      }
+    }
+  }
+}
 
-# # resource "yandex_alb_http_router" "k8s_router" {
-# #   name = "k8s-http-router"
-# # }
+resource "yandex_alb_http_router" "k8s_router" {
+  name = "k8s-http-router"
+}
 
-# # resource "yandex_alb_virtual_host" "k8s_host" {
-# #   name           = "k8s-virtual-host"
-# #   http_router_id = yandex_alb_http_router.k8s_router.id
+resource "yandex_alb_virtual_host" "k8s_host" {
+  name           = "k8s-virtual-host"
+  http_router_id = yandex_alb_http_router.k8s_router.id
 
-# #   route {
-# #     name = "k8s-route"
-# #     http_route {
-# #       http_route_action {
-# #         backend_group_id = yandex_alb_backend_group.k8s_backend.id
-# #         timeout          = "60s"
-# #       }
-# #     }
-# #   }
-# # }
+  route {
+    name = "k8s-route"
+    http_route {
+      http_route_action {
+        backend_group_id = yandex_alb_backend_group.k8s_backend.id
+        timeout          = "60s"
+      }
+    }
+  }
+}
 
-# # resource "yandex_alb_load_balancer" "k8s_alb" {
-# #   name               = "k8s-alb"
-# #   network_id         = yandex_vpc_network.k8s-network.id
-# #   security_group_ids = [yandex_vpc_security_group.alb_sg.id]
+resource "yandex_alb_load_balancer" "k8s_alb" {
+  name               = "k8s-alb"
+  network_id         = yandex_vpc_network.k8s-network.id
+  security_group_ids = [yandex_vpc_security_group.alb_sg.id]
 
-# #   allocation_policy {
-# #     location {
-# #       zone_id   = var.zone_a
-# #       subnet_id = yandex_vpc_subnet.k8s-subnet-a.id
-# #     }
-# #   }
+  allocation_policy {
+    location {
+      zone_id   = var.zone_a
+      subnet_id = yandex_vpc_subnet.k8s-subnet-a.id
+    }
+  }
 
-# #   listener {
-# #     name = "http-listener"
-# #     endpoint {
-# #       address {
-# #         external_ipv4_address {}
-# #       }
-# #       ports = [80]
-# #     }
-# #     http {
-# #       handler {
-# #         http_router_id = yandex_alb_http_router.k8s_router.id
-# #       }
-# #     }
-# #   }
-# # }
+  listener {
+    name = "http-listener"
+    endpoint {
+      address {
+        external_ipv4_address {}
+      }
+      ports = [80]
+    }
+    http {
+      handler {
+        http_router_id = yandex_alb_http_router.k8s_router.id
+      }
+    }
+  }
+}
 
 # # Импортирую сведения о state файле изи папки Backend.
 # В частности это нужно для импорта id infra-sa в ресурс resource "yandex_compute_instance_group" "worker"

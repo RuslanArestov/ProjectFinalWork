@@ -95,14 +95,14 @@ resource "yandex_storage_bucket" "tf_state" {
   #   object_lock_enabled = "Enabled"
   # }
 
-  # server_side_encryption_configuration {
-  #   rule {
-  #     apply_server_side_encryption_by_default {
-  #       kms_master_key_id = yandex_kms_symmetric_key.infra_key.id
-  #       sse_algorithm     = "aws:kms"
-  #     }
-  #   }
-  # }
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        kms_master_key_id = yandex_kms_symmetric_key.infra_key.id
+        sse_algorithm     = "aws:kms"
+      }
+    }
+  }
 
   depends_on = [
     yandex_iam_service_account.sa-infra

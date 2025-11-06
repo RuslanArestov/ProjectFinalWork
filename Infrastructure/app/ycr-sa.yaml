@@ -2,6 +2,6 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: ycr-sa
-  namespace: default
+  namespace: app
 imagePullSecrets:
   - name: ycr-secret

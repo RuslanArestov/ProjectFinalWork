@@ -8,16 +8,13 @@
 *.tfstate
 *.tfstate.*
 
-# own secret vars store.
-secrets.auto.tfvars
-
 # Authorized key
 *.json
 
-#config kubectl
-kubeconfig.yaml
-
-
-./kube/config
-
 inventory.ini
+
+# kubeconfig
+config
+
+# secret varster
+terraform.tfvars

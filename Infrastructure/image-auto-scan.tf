@@ -22,6 +22,7 @@ resource "null_resource" "docker_build_and_push" {
       yc config set cloud-id $YC_FOLDER_ID --profile infra-sa
       yc container registry configure-docker
       docker build -t cr.yandex/${yandex_container_registry.nginx-app.id}/nginx-app:latest ~/App
+      # docker build -t cr.yandex/${yandex_container_registry.nginx-app.id}/nginx-app:latest https://github.com/RuslanArestov/Nginx-app.git
       docker push cr.yandex/${yandex_container_registry.nginx-app.id}/nginx-app:latest
     
       

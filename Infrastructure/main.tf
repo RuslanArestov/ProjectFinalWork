@@ -359,3 +359,4 @@ data "template_file" "userdata_bastion" {
   }
 }
 
+# Проверка работы Atlantis

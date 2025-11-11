@@ -17,6 +17,7 @@ backend "s3" {
     skip_credentials_validation = true
     skip_requesting_account_id  = true
     skip_s3_checksum            = true
+    bucket = "my-terraform-state-bucket"
   } 
 }
 

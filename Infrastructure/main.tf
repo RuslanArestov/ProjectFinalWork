@@ -358,4 +358,4 @@ data "template_file" "userdata_bastion" {
   }
 }
 
-#
+# add terrformrc

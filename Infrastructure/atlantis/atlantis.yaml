@@ -2,7 +2,6 @@ version: 3
 projects:
   - name: atl
     dir: .
-    terraform_version: v1.11.4
     autoplan:
       when_modified: ["*.tf", "*.tfvars"]
       enabled: true

@@ -357,3 +357,5 @@ data "template_file" "userdata_bastion" {
     ssh_public_key = file(var.ssh_public_key)
   }
 }
+
+# comment

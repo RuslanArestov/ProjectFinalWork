@@ -339,7 +339,6 @@ data "terraform_remote_state" "backend" {
     skip_requesting_account_id  = true
     access_key = var.access_key
     secret_key = var.secret_key
-    # use_path_style = true
   }
 }
 
@@ -358,5 +357,3 @@ data "template_file" "userdata_bastion" {
     ssh_public_key = file(var.ssh_public_key)
   }
 }
-
-# Проверка работы Atlantis

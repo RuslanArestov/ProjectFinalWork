@@ -11,6 +11,7 @@
 # Authorized key
 *.json
 
+# Инвентори for Kubespray
 inventory.ini
 
 # kubeconfig

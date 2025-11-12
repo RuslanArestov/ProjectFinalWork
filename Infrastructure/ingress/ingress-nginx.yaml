@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: k8s-ingress
-  namespace: atlantis
+  namespace: app
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/use-regex: "true"
@@ -24,4 +24,4 @@ spec:
           service:
             name: atlantis
             port:
-              number: 4141
+              number: 80

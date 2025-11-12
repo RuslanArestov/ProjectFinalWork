@@ -81,9 +81,3 @@ variable "secret_key" {
   type      = string
   sensitive = true
 }
-
-variable "sa_key_json" {
-  type    = string
-  default = "./key.json"
-}
-

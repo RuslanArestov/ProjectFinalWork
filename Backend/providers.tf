@@ -27,6 +27,6 @@ backend "s3" {
 
 provider "yandex" {
   zone                     = var.zone_a
-  service_account_key_file = var.sa_key_json
+  service_account_key_file = file("./key.json")
 }
 

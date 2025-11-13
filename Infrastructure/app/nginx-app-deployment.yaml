@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-app
-  namespace: atlantis
+  namespace: app
 spec:
   replicas: 2
   selector:
@@ -16,7 +16,7 @@ spec:
       serviceAccountName: ycr-sa
       containers:
       - name: nginx-app
-        image: cr.yandex/crp31td5rtolopl6je0h/nginx-app:latest
+        image: cr.yandex/crpjn9i18sh1h62a9tc7/nginx-app:latest
         ports:
         - containerPort: 80
       imagePullSecrets:

@@ -60,13 +60,13 @@ variable "subnet_cidr_d" {
 variable "ssh_public_key" {
   type    = string
   # default = "~/.ssh/k8s_key.pub"
-  default     = "/secrets/ssh/k8s_key_ed25519.pub"
+  default     = "/secrets/ssh/k8s_key.pub"
 }
 
 variable "ssh_private_key_path" {
   type    = string
   # default = "~/.ssh/k8s_key"
-  default     = "/secrets/ssh/k8s_key_ed25519"
+  default     = "/secrets/ssh/k8s_key"
 }
 
 variable "username" {

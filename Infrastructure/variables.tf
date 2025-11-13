@@ -82,7 +82,7 @@ variable "secret_key" {
   sensitive = true
 }
 
-variable "sa_key_json" {
-  type    = string
-  default = "/secrets/infra/key.json"
-}
+# variable "sa_key_json" {
+#   type    = string
+#   default = "/secrets/infra/key.json"
+# }

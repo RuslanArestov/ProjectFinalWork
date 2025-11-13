@@ -12,4 +12,8 @@ variable "folder_id" {
   type    = string
 }
 
+variable "sa_key_json" {
+  type    = string
+  default = "/secrets/backend/key.json"
+}
 

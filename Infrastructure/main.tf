@@ -155,14 +155,18 @@ resource "yandex_compute_instance" "bastion" {
 }
 
 resource "yandex_compute_instance" "master" {
-  count = 3
+  # count = 3
+  count = 1
   name  = "master-${count.index}"
   zone       = element(["ru-central1-a", "ru-central1-b"], count.index)
   platform_id = "standard-v1"
 
   resources {
-    cores  = 4
-    memory = 6
+    # cores  = 4
+    # memory = 6
+    # core_fraction = 5
+    cores  = 2
+    memory = 4
     core_fraction = 5
   }
 
@@ -173,7 +177,7 @@ resource "yandex_compute_instance" "master" {
   boot_disk {
     initialize_params {
       image_id = data.yandex_compute_image.ubuntu.image_id
-      size     = 20
+      size     = 10
       type     = "network-hdd"
     }
   }
@@ -235,8 +239,10 @@ resource "yandex_compute_instance_group" "worker" {
 
   scale_policy {
     auto_scale {
-      initial_size = 4
-      min_zone_size     = 2
+      # initial_size = 4
+      initial_size = 2
+      # min_zone_size     = 2
+      min_zone_size     = 1
       max_size     = 6
       measurement_duration = 60
       cpu_utilization_target = 75
@@ -323,7 +329,7 @@ resource "yandex_alb_load_balancer" "k8s_alb" {
   }
 }
 
-# # Импортирую сведения о state файле изи папки Backend.
+# # Импортирую сведения о state файле из папки Backend.
 # В частности это нужно для импорта id infra-sa в ресурс resource "yandex_compute_instance_group" "worker"
 data "terraform_remote_state" "backend" {
   backend = "s3"

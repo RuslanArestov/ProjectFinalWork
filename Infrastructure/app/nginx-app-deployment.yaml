@@ -16,7 +16,7 @@ spec:
       serviceAccountName: ycr-sa
       containers:
       - name: nginx-app
-        image: cr.yandex/crpu92gqj4us1vd1rrqh/nginx-app:latest
+        image: cr.yandex/crpjn9i18sh1h62a9tc7/nginx-app:latest
         ports:
         - containerPort: 80
       imagePullSecrets:

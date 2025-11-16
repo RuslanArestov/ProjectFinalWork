@@ -339,7 +339,7 @@ data "terraform_remote_state" "backend" {
     }
     bucket = "bucket-tf1"
     region   = "ru-central1"
-    key    = "backend/state/main.tfstate"
+    key    = "baackend/state/main.tfstate"
     skip_region_validation      = true
     skip_credentials_validation = true
     skip_requesting_account_id  = true

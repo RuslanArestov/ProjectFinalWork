@@ -14,6 +14,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Install Yandex Cloud CLI
+        run: |
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          export PATH="$HOME/bin:$PATH"
+          yc --version
+  
       - name: Login to YCR
         run: |
           cat <<EOF > key.json

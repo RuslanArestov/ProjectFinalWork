@@ -30,12 +30,18 @@ jobs:
           yc config set service-account-key key.json
           yc container registry configure-docker
 
-      - name: Build Docker image
+      - name: Build and push Docker image
         run: |
-          IMAGE="cr.yandex/cr.yandex/crp4j5bli6ctb3qlf1kr/nginx-app"
-          TAG="${GITHUB_SHA::7}"
-          docker build -t $IMAGE:$TAG .
-          docker tag $IMAGE:$TAG $IMAGE:latest
+          IMAGE="cr.yandex/crp4j5bli6ctb3qlf1kr/nginx-app"
+          git clone https://github.com/RuslanArestov/Nginx-app.git app
+          cd app
+          docker build -t $IMAGE .
+      
+          echo "${{ secrets.YANDEX_CONTAINER_REGISTRY_AUTH }}" > key.json
+          yc config set service-account-key key.json
+          yc container registry configure-docker
+      
+          docker push $IMAGE
 
       - name: Push Docker image
         run: |

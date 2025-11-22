@@ -19,6 +19,9 @@ jobs:
           # Установка Yandex Cloud CLI
           curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
           export PATH="$HOME/bin:$PATH"
+          source "/home/runner/.bashrc
+          echo 'source /home/runner/yandex-cloud/completion.zsh.inc' >>  ~/.zshrc
+          
           echo '${{ secrets.YANDEX_CONTAINER_REGISTRY_AUTH }}' > key.json
 
           yc config set service-account-key key.json

@@ -16,7 +16,9 @@ jobs:
 
       - name: Login to YCR
         run: |
-          echo "${{ secrets.YANDEX_CONTAINER_REGISTRY_AUTH }}" > key.json
+          cat <<EOF > key.json
+          ${{ secrets.YANDEX_CONTAINER_REGISTRY_AUTH }}
+          EOF
           yc config set service-account-key key.json
           yc container registry configure-docker
 

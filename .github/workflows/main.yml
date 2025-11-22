@@ -21,11 +21,11 @@ jobs:
           curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
           export PATH="$HOME/yandex-cloud/bin:$PATH"
           yc --version
-
-          # Создаём key.json из секрета
-          printf "%s" "${{ secrets.YANDEX_CONTAINER_REGISTRY_AUTH }}" > key.json
-
-          # Логинимся в Yandex Cloud
+      
+          # Записываем секрет в файл корректно
+          echo "${{ secrets.YANDEX_CONTAINER_REGISTRY_AUTH }}" > key.json
+      
+          # Настройка YC
           yc config set service-account-key key.json
           yc container registry configure-docker
 

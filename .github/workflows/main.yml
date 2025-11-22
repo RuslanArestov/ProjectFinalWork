@@ -15,16 +15,16 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install Yandex Cloud CLI and login
+        shell: bash
         run: |
           curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
-          # Добавляем путь к yc, который установлен скриптом
           export PATH="$HOME/yandex-cloud/bin:$PATH"
-          yc --version
-          # Сохраняем JSON ключ в файл
-          echo "${{ secrets.YANDEX_CONTAINER_REGISTRY_AUTH }}" > key.json
-          # Настраиваем yc для использования сервисного аккаунта
+      
+          printf "%s" "${{ secrets.YANDEX_CONTAINER_REGISTRY_AUTH }}" > key.json
+
           yc config set service-account-key key.json
           yc container registry configure-docker
+
 
       - name: Build Docker image
         run: |

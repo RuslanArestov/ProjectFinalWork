@@ -37,8 +37,8 @@ jobs:
 
           # Настройка YC и Docker для авторизации
           echo "${{ secrets.YANDEX_CONTAINER_REGISTRY_AUTH }}" > key.json
-          yc config set service-account-key key.json
-          yc container registry configure-docker
+          $HOME/yandex-cloud/bin/yc config set service-account-key key.json
+          $HOME/yandex-cloud/bin/yc container registry configure-docker
 
           # Пушим образы сразу с двумя тегами: latest и SHA
           docker tag $IMAGE $IMAGE:$TAG

@@ -37,7 +37,9 @@ jobs:
           cd app
           docker build -t $IMAGE .
       
-          echo "${{ secrets.YANDEX_CONTAINER_REGISTRY_AUTH }}" > key.json
+          cat > key.json <<'EOF'
+          ${{ secrets.YANDEX_CONTAINER_REGISTRY_AUTH }}
+          EOF
           yc config set service-account-key key.json
           yc container registry configure-docker
       

@@ -36,7 +36,9 @@ jobs:
           docker build -t $IMAGE .
 
           # Настройка YC и Docker для авторизации
-          echo "${{ secrets.YANDEX_CONTAINER_REGISTRY_AUTH }}" > key.json
+          cat > key.json <<EOF
+          ${{ secrets.YANDEX_CONTAINER_REGISTRY_AUTH }}
+          EOF
           $HOME/yandex-cloud/bin/yc config set service-account-key key.json
           $HOME/yandex-cloud/bin/yc container registry configure-docker
 

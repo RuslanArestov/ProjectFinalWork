@@ -22,30 +22,36 @@ jobs:
           export PATH="$HOME/yandex-cloud/bin:$PATH"
           yc --version
       
-          # Записываем секрет в файл корректно
-          echo "${{ secrets.YANDEX_CONTAINER_REGISTRY_AUTH }}" > key.json
-      
-          # Настройка YC
+          # Создаём key.json корректно
+          cat > key.json <<'EOF'
+          ${{ secrets.YANDEX_CONTAINER_REGISTRY_AUTH }}
+          EOF
+
           yc config set service-account-key key.json
           yc container registry configure-docker
 
       - name: Build and push Docker image
-        shell: bash
         run: |
           IMAGE="cr.yandex/crp4j5bli6ctb3qlf1kr/nginx-app"
-          TAG="${GITHUB_SHA::7}"
-
-          # Клонируем проект и собираем Docker
           git clone https://github.com/RuslanArestov/Nginx-app.git app
           cd app
-          docker build -t $IMAGE:$TAG .
-          docker tag $IMAGE:$TAG $IMAGE:latest
+          docker build -t $IMAGE .
+      
+          echo "${{ secrets.YANDEX_CONTAINER_REGISTRY_AUTH }}" > key.json
+          yc config set service-account-key key.json
+          yc container registry configure-docker
+      
+          docker push $IMAGE
 
-          # Пушим оба тега
+      - name: Push Docker image
+        run: |
+          IMAGE="cr.yandex/cr.yandex/crp4j5bli6ctb3qlf1kr/nginx-app"
+          TAG="${GITHUB_SHA::7}"
           docker push $IMAGE:$TAG
           docker push $IMAGE:latest
 
       - name: Save tag
+        id: vars
         run: echo "TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
   deploy:
@@ -61,7 +67,7 @@ jobs:
 
       - name: Update Deployment in K8s
         run: |
-          IMAGE="cr.yandex/crp4j5bli6ctb3qlf1kr/nginx-app"
+          IMAGE="cr.yandex/cr.yandex/crp4j5bli6ctb3qlf1kr/nginx-app"
           kubectl set image deployment/nginx-app \
             nginx-app=$IMAGE:${{ env.TAG }} \
             -n app

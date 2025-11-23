@@ -14,11 +14,7 @@
 # Инвентори for Kubespray
 inventory.ini
 
-# kubeconfig
-config
-
 # secret varster
 terraform.tfvars
 
-atlantis.var
-values.yaml
+values_template.yaml

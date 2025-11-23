@@ -1,0 +1,123 @@
+image:
+  repository: ghcr.io/runatlantis/atlantis
+  tag: v0.37.1
+  pullPolicy: Always
+
+repoConfig: |
+  ---
+  repos:
+    - id: /.*/
+      apply_requirements: []
+      workflow: default
+      allowed_overrides:
+        - workflow
+      allow_custom_workflows: true
+  workflows:
+    default:
+      plan:
+        steps: [init, plan]
+      apply:
+        steps: [apply]
+
+volumeClaim:
+  enabled: true
+  dataStorage: 5Gi
+  storageClassName: "local-path"
+  accessModes: ["ReadWriteOnce"]
+
+replicaCount: 1
+
+resources:
+  requests:
+    memory: 512Mi
+    cpu: 250m
+  limits:
+    memory: 1Gi
+    cpu: 500m
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 4141
+
+statefulSet:
+  securityContext:
+    fsGroup: 1000
+    runAsUser: 100
+
+livenessProbe:
+  enabled: true
+readinessProbe:
+  enabled: true
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+environmentSecrets:
+  - name: AWS_ACCESS_KEY_ID
+    secretKeyRef:
+      name: yc-credentials
+      key: AWS_ACCESS_KEY_ID
+  - name: AWS_SECRET_ACCESS_KEY
+    secretKeyRef:
+      name: yc-credentials
+      key: AWS_SECRET_ACCESS_KEY
+
+  - name: TF_VAR_folder_id
+    secretKeyRef:
+      name: atlantis-tf-vars
+      key: folder_id
+  - name: TF_VAR_access_key
+    secretKeyRef:
+      name: atlantis-tf-vars
+      key: access_key
+  - name: TF_VAR_secret_key
+    secretKeyRef:
+      name: atlantis-tf-vars
+      key: secret_key  
+
+environment:
+  BACKEND_KEY_PATH: "/secrets/backend/key.json"
+  INFRA_KEY_PATH: "/secrets/infra/key.json"
+
+  SSH_PUBLIC_KEY_PATH: "/secrets/ssh/k8s_key.pub"
+  SSH_PRIVATE_KEY_PATH: "/secrets/ssh/k8s_key"
+
+extraVolumes:
+  - name: terraformrc
+    configMap:
+      name: atlantis-terraformrc
+      items:
+        - key: .terraformrc
+          path: .terraformrc
+
+  - name: backend-sa-key-volume
+    secret:
+      secretName: backend-sa-key
+  - name: infra-sa-key-volume
+    secret:
+      secretName: infra-sa-key
+
+  - name: infra-ssh-key-volume
+    secret:
+      secretName: infra-ssh-key
+
+extraVolumeMounts:
+  - name: terraformrc
+    mountPath: /home/atlantis/.terraformrc
+    subPath: .terraformrc
+
+  - name: backend-sa-key-volume
+    mountPath: /secrets/backend/key.json
+    subPath: key.json
+  - name: infra-sa-key-volume
+    mountPath: /secrets/infra/key.json
+    subPath: key.json
+
+  - name: infra-ssh-key-volume
+    mountPath: /secrets/ssh/k8s_key.pub
+    subPath: k8s_key.pub
+  - name: infra-ssh-key-volume
+    mountPath: /secrets/ssh/k8s_key
+    subPath: k8s_key    

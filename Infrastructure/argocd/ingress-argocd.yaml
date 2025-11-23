@@ -1,34 +1,28 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: k8s-ingress
-  namespace: app
+  name: argocd-ingress       # <-- обязательно
+  namespace: argocd          # <-- обязательно, если не default
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
   rules:
   - http:
       paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: nginx-service
-            port:
-              number: 80
-      - path: /atlantis(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: atlantis
-            port:
-              number: 80
-      - path: /argocd(/|$)(.*)
+      - path: /argo-webhook(/|$)(.*)
         pathType: ImplementationSpecific
         backend:
           service:
             name: argocd-server
             port:
-              number: 80        
+              number: 443
+      - path: /(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: argocd-server
+            port:
+              number: 443

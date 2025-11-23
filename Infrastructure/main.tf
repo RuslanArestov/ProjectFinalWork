@@ -112,6 +112,18 @@ resource "yandex_vpc_security_group" "alb_sg" {
     v4_cidr_blocks = ["198.18.235.0/24", "198.18.248.0/24"]
   }
 
+  ingress {
+    protocol       = "TCP"
+    port           = 443
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    protocol       = "TCP"
+    port           = 31443
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     protocol       = "ANY"
     from_port      = 0
@@ -329,6 +341,29 @@ resource "yandex_alb_load_balancer" "k8s_alb" {
   }
 }
 
+resource "yandex_alb_backend_group" "argocd_backend" {
+  name = "argocd-backend-group"
+
+  http_backend { 
+    name   = "argocd-https-backend"
+    weight = 1
+    port   = 30443
+    target_group_ids = [
+      yandex_compute_instance_group.worker.application_load_balancer[0].target_group_id
+    ]
+
+    healthcheck {
+      timeout             = "10s"
+      interval            = "5s"
+      healthy_threshold   = 3
+      unhealthy_threshold = 3
+      http_healthcheck { 
+        path = "/argo-webhook"
+      }
+    }
+  }
+}
+
 # # Импортирую сведения о state файле из папки Backend.
 # В частности это нужно для импорта id infra-sa в ресурс resource "yandex_compute_instance_group" "worker"
 data "terraform_remote_state" "backend" {
@@ -339,7 +374,7 @@ data "terraform_remote_state" "backend" {
     }
     bucket = "bucket-tf1"
     region   = "ru-central1"
-    key    = "baackend/state/main.tfstate"
+    key    = "backend/state/main.tfstate"
     skip_region_validation      = true
     skip_credentials_validation = true
     skip_requesting_account_id  = true

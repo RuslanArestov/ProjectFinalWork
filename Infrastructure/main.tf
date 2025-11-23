@@ -112,6 +112,18 @@ resource "yandex_vpc_security_group" "alb_sg" {
     v4_cidr_blocks = ["198.18.235.0/24", "198.18.248.0/24"]
   }
 
+  ingress {
+    protocol       = "TCP"
+    port           = 443
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    protocol       = "TCP"
+    port           = 31443
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     protocol       = "ANY"
     from_port      = 0
@@ -155,14 +167,18 @@ resource "yandex_compute_instance" "bastion" {
 }
 
 resource "yandex_compute_instance" "master" {
-  count = 3
+  # count = 3
+  count = 1
   name  = "master-${count.index}"
   zone       = element(["ru-central1-a", "ru-central1-b"], count.index)
   platform_id = "standard-v1"
 
   resources {
-    cores  = 4
-    memory = 6
+    # cores  = 4
+    # memory = 6
+    # core_fraction = 5
+    cores  = 2
+    memory = 4
     core_fraction = 5
   }
 
@@ -173,7 +189,7 @@ resource "yandex_compute_instance" "master" {
   boot_disk {
     initialize_params {
       image_id = data.yandex_compute_image.ubuntu.image_id
-      size     = 20
+      size     = 10
       type     = "network-hdd"
     }
   }
@@ -235,8 +251,10 @@ resource "yandex_compute_instance_group" "worker" {
 
   scale_policy {
     auto_scale {
-      initial_size = 4
-      min_zone_size     = 2
+      # initial_size = 4
+      initial_size = 2
+      # min_zone_size     = 2
+      min_zone_size     = 1
       max_size     = 6
       measurement_duration = 60
       cpu_utilization_target = 75
@@ -323,7 +341,30 @@ resource "yandex_alb_load_balancer" "k8s_alb" {
   }
 }
 
-# # Импортирую сведения о state файле изи папки Backend.
+resource "yandex_alb_backend_group" "argocd_backend" {
+  name = "argocd-backend-group"
+
+  http_backend { 
+    name   = "argocd-https-backend"
+    weight = 1
+    port   = 30443
+    target_group_ids = [
+      yandex_compute_instance_group.worker.application_load_balancer[0].target_group_id
+    ]
+
+    healthcheck {
+      timeout             = "10s"
+      interval            = "5s"
+      healthy_threshold   = 3
+      unhealthy_threshold = 3
+      http_healthcheck { 
+        path = "/argo-webhook"
+      }
+    }
+  }
+}
+
+# # Импортирую сведения о state файле из папки Backend.
 # В частности это нужно для импорта id infra-sa в ресурс resource "yandex_compute_instance_group" "worker"
 data "terraform_remote_state" "backend" {
   backend = "s3"
@@ -339,7 +380,6 @@ data "terraform_remote_state" "backend" {
     skip_requesting_account_id  = true
     access_key = var.access_key
     secret_key = var.secret_key
-    # use_path_style = true
   }
 }
 
@@ -359,3 +399,4 @@ data "template_file" "userdata_bastion" {
   }
 }
 
+##

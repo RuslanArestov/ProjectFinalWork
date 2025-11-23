@@ -16,3 +16,6 @@ secrets.auto.tfvars
 
 #config kubectl
 kubeconfig.yaml
+
+# secret varster
+terraform.tfvars

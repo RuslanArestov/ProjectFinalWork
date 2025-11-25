@@ -25,10 +25,18 @@ spec:
             name: atlantis
             port:
               number: 80
-      - path: /argocd(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: argocd-server
-            port:
-              number: 80        
+      # - path: /argocd(/|$)(.*)
+      #   pathType: ImplementationSpecific
+      #   backend:
+      #     service:
+      #       name: argocd-server
+      #       port:
+      #         number: 80
+      # - path: /grafana(/|$)(.*)
+      #   pathType: ImplementationSpecific
+      #   backend:
+      #     service:
+      #       name: grafana-proxy
+      #       port:
+      #         number: 3000
+    

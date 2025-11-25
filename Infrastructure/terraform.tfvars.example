@@ -1,2 +1,5 @@
 access_key = ""
 secret_key = ""
+sa_key_json = ""
+ssh_public_key = ""
+ssh_private_key_path = ""

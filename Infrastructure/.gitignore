@@ -17,4 +17,5 @@ inventory.ini
 # secret varster
 terraform.tfvars
 
+# templata values.yaml file for Atlantis
 values_template.yaml

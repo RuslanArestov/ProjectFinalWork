@@ -32,11 +32,11 @@ spec:
       #       name: argocd-server
       #       port:
       #         number: 80
-      - path: /grafana(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: grafana-proxy
-            port:
-              number: 3000
+      # - path: /grafana(/|$)(.*)
+      #   pathType: ImplementationSpecific
+      #   backend:
+      #     service:
+      #       name: grafana-proxy
+      #       port:
+      #         number: 3000
     

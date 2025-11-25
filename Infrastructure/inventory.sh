@@ -31,5 +31,3 @@ cat <<EOF >> $inventory_file
 ansible_user=${user}
 ansible_ssh_private_key_file=${key_path}
 EOF
-
-echo "Inventory успешно сгенерирован: ${inventory_file}"

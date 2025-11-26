@@ -1,5 +1,3 @@
-# Добавление прочих переменных
-
 locals {
   registry_name      = "my-registry"
   function_name      = "scan-on-push"

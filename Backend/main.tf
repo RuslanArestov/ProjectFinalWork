@@ -1,9 +1,11 @@
+# Сервисный аккаунт для работы с инфраструктурой
 resource "yandex_iam_service_account" "sa-infra" {
   name        = "sa-infra"
   folder_id = var.folder_id 
   description = " sa для управления инфраструктурой Terraform"
 }
 
+# Роли sa-infra
 resource "yandex_resourcemanager_folder_iam_member" "sa-infra_storage_admin" {
   role        = "storage.admin"
   member      = "serviceAccount:${yandex_iam_service_account.sa-infra.id}"
@@ -76,17 +78,20 @@ resource "yandex_resourcemanager_folder_iam_member" "sa-infra_functions_function
   member      = "serviceAccount:${yandex_iam_service_account.sa-infra.id}"
 }
 
+# Статический ключ для доступа к бакету
 resource "yandex_iam_service_account_static_access_key" "sa-infra_key" {
   service_account_id = yandex_iam_service_account.sa-infra.id
   depends_on = [yandex_iam_service_account.sa-infra]
 }
 
+# Шифрование бакета
 resource "yandex_kms_symmetric_key" "infra_key" {
   name              = "kms-key"
   default_algorithm = "AES_128"
   rotation_period   = "8760h"
 }
 
+# Бакет для хранения state файлов директории Backend и Inrasrtucture
 resource "yandex_storage_bucket" "tf_state" {
   bucket     = var.bucket_name       
   max_size   = 1073741824
@@ -115,6 +120,7 @@ resource "yandex_storage_bucket" "tf_state" {
   ]
 } 
 
+# Разрешения на бакет
 resource "yandex_storage_bucket_iam_binding" "sa-admins" {
   bucket  = var.bucket_name
   role    = "storage.admin"
@@ -124,13 +130,14 @@ resource "yandex_storage_bucket_iam_binding" "sa-admins" {
   depends_on = [yandex_storage_bucket.tf_state]          
 }
 
+# Создаю авторизованный ключ для infra-sa для авторизации в директории Infrastructure
 resource "yandex_iam_service_account_key" "sa_infra_json_key" {
   service_account_id = yandex_iam_service_account.sa-infra.id
   description        = "Terraform key for infra"
   key_algorithm      = "RSA_4096"
 }
 
-# Формирую правильное содержание авторизованного ключа для infra-sa
+# Формирую правильное содержание авторизованного ключа для infra-sa в директории Infrastructure
 resource "local_file" "sa_key_json" {
   content = templatefile("${path.module}/key.json.tpl", {
     id                 = yandex_iam_service_account_key.sa_infra_json_key.id

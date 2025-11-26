@@ -6,6 +6,7 @@ output "alb_ip" {
   value = yandex_alb_load_balancer.k8s_alb.listener[0].endpoint[0].address[0].external_ipv4_address[0].address
 }
 
+# Использую вывод ip нод для создания инвентори для роли Kubespray
 output "master_private_ips" {
   value = [for m in yandex_compute_instance.master : m.network_interface[0].ip_address]
 }

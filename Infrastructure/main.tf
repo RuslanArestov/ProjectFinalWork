@@ -1,3 +1,4 @@
+# VPC с подсетями
 resource "yandex_vpc_network" "k8s-network" {
   name = var.network_name
 }
@@ -44,98 +45,117 @@ resource "yandex_vpc_route_table" "private_nodes_rt" {
   }
 }
 
+# SG для бастиона
+resource "yandex_vpc_security_group" "bastion_sg" {
+  name       = "bastion_sg"
+  network_id = yandex_vpc_network.k8s-network.id
+
+    ingress {
+    protocol = "TCP"
+    port     = 22
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    egress {
+      protocol       = "ANY"
+      v4_cidr_blocks = ["0.0.0.0/0"]
+    }
+}
+
+# SG для воркер и мастер нод
 resource "yandex_vpc_security_group" "k8s_sg" {
   name       = "k8s_sg"
   network_id = yandex_vpc_network.k8s-network.id
 
-  #  ingress {
-  #   protocol       = "TCP"
-  #   port           = 22
-  #   v4_cidr_blocks = ["0.0.0.0/0"]
-  # }
+#  ingress {
+#     protocol       = "TCP"
+#     port           = 22
+#     v4_cidr_blocks = ["10.0.4.0/24"]
+#    }
 
-  # ingress {
-  #   protocol       = "TCP"
-  #   port           = 30080
-  #   security_group_id = yandex_vpc_security_group.alb_sg.id
-  # }
+#     ingress {
+#       protocol       = "TCP"
+#       port           = 6443
+#       v4_cidr_blocks = ["10.0.4.0/24"]
+#     }
 
-  # ingress {
-  #   protocol       = "TCP"
-  #   port           = 30080
-  #   v4_cidr_blocks = ["198.18.235.0/24", "198.18.248.0/24"]
-  # }
+#     ingress {
+#       protocol   = "TCP"
+#       port       = 10250
+#       v4_cidr_blocks = [var.subnet_cidr_a, var.subnet_cidr_b, var.subnet_cidr_d]
+#     }
+
+#     ingress {
+#       protocol   = "TCP"
+#       from_port  = 2379
+#       to_port    = 2380
+#       v4_cidr_blocks = [var.subnet_cidr_a, var.subnet_cidr_b, var.subnet_cidr_d]
+#     }
+
+#     ingress {
+#       protocol = "TCP"
+#       port = 30082
+#       v4_cidr_blocks = ["198.18.235.0/24", "198.18.248.0/24"]
+#     }
 
     ingress {
-    protocol       = "TCP"
-    from_port = 0
-    to_port = 65535
-    v4_cidr_blocks = ["0.0.0.0/0"]
-  }
+      protocol       = "ANY"
+      v4_cidr_blocks = ["0.0.0.0/0"]
+    }
 
-   ingress {
-    protocol       = "UDP"
-    from_port = 0
-    to_port = 65535
-    v4_cidr_blocks = ["0.0.0.0/0"]
-  }
-
-
-  ingress {
-    protocol       = "ICMP"
-    description    = "Allow all ICMP"
-    v4_cidr_blocks = ["0.0.0.0/0"]
-  }
-
-   egress {
-    protocol       = "ANY"
-    from_port      = 0
-    to_port        = 65535
-    v4_cidr_blocks = ["0.0.0.0/0"]
-  }
+    egress {
+      protocol       = "ANY"
+      v4_cidr_blocks = ["0.0.0.0/0"]
+    }
 }
 
+# SG для ALB
 resource "yandex_vpc_security_group" "alb_sg" {
   name       = "alb-sg"
   network_id = yandex_vpc_network.k8s-network.id
 
 
-  ingress {
-    protocol       = "TCP"
-    port           = 80
-    v4_cidr_blocks = ["0.0.0.0/0"]
-  }
+  # ingress {
+  #   protocol       = "TCP"
+  #   port           = 80
+  #   v4_cidr_blocks = ["0.0.0.0/0"]
+  # }
+
+  # egress {
+  #   protocol = "UDP"
+  #   port     = 53
+  #   v4_cidr_blocks = ["0.0.0.0/0"]
+  # }
+
+  # egress {
+  #   protocol = "TCP"
+  #   port     = 53
+  #   v4_cidr_blocks = ["0.0.0.0/0"]
+  # }
+
+  #  egress {
+  #   protocol    = "TCP"
+  #   port   = 30082
+  #   v4_cidr_blocks = [var.subnet_cidr_a, var.subnet_cidr_b, var.subnet_cidr_d]
+  # }
 
   ingress {
-    protocol       = "TCP"
-    port           = 30080
-    v4_cidr_blocks = ["198.18.235.0/24", "198.18.248.0/24"]
-  }
+      protocol       = "ANY"
+      v4_cidr_blocks = ["0.0.0.0/0"]
+    }
 
-  ingress {
-    protocol       = "TCP"
-    port           = 443
-    v4_cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    protocol       = "TCP"
-    port           = 31443
-    v4_cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    protocol       = "ANY"
-    from_port      = 0
-    to_port        = 65535
-    v4_cidr_blocks = ["0.0.0.0/0"]
-  }
+    egress {
+      protocol       = "ANY"
+      v4_cidr_blocks = ["0.0.0.0/0"]
+    }
 }
 
+# Образ всех хостов
 data "yandex_compute_image" "ubuntu" {
   family = "ubuntu-2204-lts"
 }
 
+# Бастион-хост
 resource "yandex_compute_instance" "bastion" {
   name        = "bastion"
   zone        = "ru-central1-a"
@@ -158,7 +178,7 @@ resource "yandex_compute_instance" "bastion" {
   network_interface {
     subnet_id = yandex_vpc_subnet.bastion-subnet.id
     nat       = true
-    security_group_ids = [yandex_vpc_security_group.k8s_sg.id]
+    security_group_ids = [yandex_vpc_security_group.bastion_sg.id]
   }
 
   metadata = {
@@ -166,6 +186,8 @@ resource "yandex_compute_instance" "bastion" {
   }
 }
 
+# Мастер ноды
+# Для экономии средств в YC уменьшил количество машин и их ресурсы
 resource "yandex_compute_instance" "master" {
   # count = 3
   count = 1
@@ -207,6 +229,7 @@ resource "yandex_compute_instance" "master" {
   }
 }
 
+# Воркер ноды
 resource "yandex_compute_instance_group" "worker" {
   name                = "worker-instance-group"
   service_account_id = data.terraform_remote_state.backend.outputs["sa-infra_id"]
@@ -271,13 +294,14 @@ resource "yandex_compute_instance_group" "worker" {
   }
 }
 
+# Application Load Balancer
 resource "yandex_alb_backend_group" "k8s_backend" {
   name = "k8s-backend-group"
 
   http_backend {
     name   = "k8s-http-backend"
     weight = 1
-    port   = 30082
+    port   = 30082 # node порт для доступа к приложениям
 
     target_group_ids = [yandex_compute_instance_group.worker.application_load_balancer[0].target_group_id]
 
@@ -341,28 +365,28 @@ resource "yandex_alb_load_balancer" "k8s_alb" {
   }
 }
 
-resource "yandex_alb_backend_group" "argocd_backend" {
-  name = "argocd-backend-group"
+# resource "yandex_alb_backend_group" "argocd_backend" {
+#   name = "argocd-backend-group"
 
-  http_backend { 
-    name   = "argocd-https-backend"
-    weight = 1
-    port   = 30443
-    target_group_ids = [
-      yandex_compute_instance_group.worker.application_load_balancer[0].target_group_id
-    ]
+#   http_backend { 
+#     name   = "argocd-https-backend"
+#     weight = 1
+#     port   = 31443
+#     target_group_ids = [
+#       yandex_compute_instance_group.worker.application_load_balancer[0].target_group_id
+#     ]
 
-    healthcheck {
-      timeout             = "10s"
-      interval            = "5s"
-      healthy_threshold   = 3
-      unhealthy_threshold = 3
-      http_healthcheck { 
-        path = "/argo-webhook"
-      }
-    }
-  }
-}
+#     healthcheck {
+#       timeout             = "10s"
+#       interval            = "5s"
+#       healthy_threshold   = 3
+#       unhealthy_threshold = 3
+#       http_healthcheck { 
+#         path = "/argo-webhook"
+#       }
+#     }
+#   }
+# }
 
 # # Импортирую сведения о state файле из папки Backend.
 # В частности это нужно для импорта id infra-sa в ресурс resource "yandex_compute_instance_group" "worker"
@@ -383,6 +407,7 @@ data "terraform_remote_state" "backend" {
   }
 }
 
+# Использую cloud init
 data "template_file" "userdata" {
   template = file("${path.module}/cloud-init.yml")
   vars = {

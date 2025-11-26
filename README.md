@@ -1,57 +1,59 @@
-1. Создание облачной инфраструктуры
+## 1. Создание облачной инфраструктуры
 
-Сначала я создал в консоли Yandex Cloud сервисный аккаунт backend-sa с необходимыми ролями для поднятия бакета.
-![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/backend-sa.png) </br>
+На начальном этапе я создал в консоли Yandex Cloud сервисный аккаунт backend-sa с необходимыми ролями для создания бакета.
 
-Далее в директории Backend написал создание сервисного аккаунта infra-sa, который будет поднимать основную инфраструктуру, и бакета для удаленного хранения state файлов.
+![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/Diplom/backend-sa.png) </br>
 
-![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/states.png) </br>
+Далее в директории Backend написал создание сервисного аккаунта infra-sa для развертывания основной инфраструктуры, бакета для удаленного хранения state файлов Terraform и авторизованного ключа для сервисного аккаунта.
 
-А также создание авторизованного ключа для сервисного аккаунта.
+![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/Diplom/states.png) </br>
 
-В директории Infrastructure - вся инфраструктура - написал создание VPC, master, worker ноды для K8s, ALB для доступа к приложениях, расположенных в кластере K8s, Yandex Container Registry с автоматическим сканированием образов. Ноды кластера K8s находятся в приватной сети. Доступ к ним можно получить через Бастион-хост. Через него же кластер выходит в Интернет.
+В директории Infrastructure описана вся инфраструктура. Написал создание VPC, master, worker нод для K8s, ALB для доступа к приложениям в K8s-кластере, Yandex Container Registry с автоматическим сканированием образов. Ноды кластера K8s находятся в приватной сети. Доступ к ним организован через бастион-хост, который также обеспечивает выход кластера в интернет.
 
-![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/infrastructure.png) </br>
+![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/Diplom/infrastructure.png) </br>
 
-2. Создал кластер отказоустойчивый K8s с 3 мастер-нодами с помощью роли Kubespray.
+## 2. Развертывание отказоустойчивого кластера Kubernetes
 
-Доступ к кластеру настроил через SSH-туннель с локальной машины через Бастион-хост
+Развернул отказоустойчивый кластер Kubernetes с тремя мастер-нодами с помощью роли Kubespray. Доступ к кластеру настроил через SSH-туннель с локальной машины через Бастион-хост.
 
-3. Создал тестовое приложение на основе nginx образа и разместил его в репозитории https://github.com/RuslanArestov/Nginx-app.
-Приложение при поднятии инфраструктуры собирается и пушится в Yandex Container Registry.
+## 3. Подготовка тестового приложения
 
-4. Для деплоя мониторинга использовал пакет kube-prometheus. Внес небольшие изменения (увеличил лимиты ресурсов) в конфигурационный файл grafana для устойчивой работы.
+Создал тестовое приложение на основе образа nginx и разместил его в репозитории https://github.com/RuslanArestov/Nginx-app. Приложение автоматически собирается и отправляется в Yandex Container Registry в процессе развертывания инфраструктуры.
 
-![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/dashboard.png) </br>
+## 4. Настройка деплоя и мониторинга
 
-![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/dashboard2.png) </br>
+Для развертывания системы мониторинга использовал пакет kube-prometheus. Внес корректировки в конфигурацию Grafana (увеличил лимиты ресурсов) для обеспечения стабильной работы.
 
-Задеплоил nginx-приложение с помощью манифестов из Yandex Container Registry
+![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/Diplom/dashboard.png) </br>
 
-Задеплоил Atlantis с помощью helm манифеста. Создал storageclass. Пробросил в контейнер Atlantis секреты, файл .terrafromrc.
+![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/Diplom/dashboard2.png) </br>
 
-![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/atlantis.png) </br>
+Развернул nginx-приложение с помощью манифестов, используя образы из Yandex Container Registry.
 
-Настроил вебхуки в репозитории проекта
-![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/webhooks.png) </br>
+Установил Atlantis с помощью Helm-чарта. Создал StorageClass и настроил проброс в контейнер Atlantis секретов и файла .terraformrc.
 
-Установил Nginx Ingress Controller
-Проверил работу Atlantis и доступ к nginx-приложениею по http. 
+![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/Diplom/atlantis.png) </br>
 
-![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/atlantis_jobs.png) </br>
+Настроил вебхуки в репозитории проекта для автоматизации workflow.
+![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/Diplom/webhooks.png) </br>
 
-![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/atlantis_plan.png) </br>
+Установил Nginx Ingress Controller и проверил работоспособность Atlantis, а также доступ к nginx-приложению по HTTP.
 
-![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/nginx-app.png) </br>
+![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/Diplom/atlantis_jobs.png) </br>
+
+![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/Diplom/atlantis_plan.png) </br>
+
+![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/Diplom/nginx-app.png) </br>
 
 
+## 5. Настройка CI/CD с Github Actions
 
-5. Настроил Github Actions
+![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/Diplom/github_secrets.png) </br>
 
-![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/github_secrets.png) </br>
+Настроил автоматическую сборку образов и их отправку в Yandex Container Registry с помощью Github Actions.
 
-Образы, помезенные в Yandex Container Registry посредством Github Actions
-![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/YCR_docker_images_tag.png) </br>
+![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/Diplom/YCR_docker_images_tag.png) </br>
 
-Деплой приложения из Yandex Conrainer Registry в K8s при внесении изменений в код репозитория с приложением
-![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/deploy_tag_v1.0.0.png) </br>
+Реализовал автоматический деплой приложений из Yandex Container Registry в Kubernetes при внесении изменений в код репозитория приложения.
+
+![Alt text](https://github.com/RuslanArestov/ProjectFinalWork/blob/main/images/Diplom/deploy_tag_v1.0.0.png) </br>

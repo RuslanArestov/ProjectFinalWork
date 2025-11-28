@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  k8s_key: <key>
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: infra-ssh-key
+  namespace: app
+
+# Создавал секрет через kubectl

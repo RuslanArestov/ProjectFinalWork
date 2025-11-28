@@ -1,0 +1,11 @@
+apiVersion: v1
+data:
+  backend_key_path: <backend_path>
+  infra_key_path: <infra_backend>
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: atlantis-paths
+  namespace: app
+
+  # Создавал секрет через kubectl

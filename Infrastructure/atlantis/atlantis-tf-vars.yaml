@@ -1,0 +1,12 @@
+apiVersion: v1
+data:
+  access_key: <access_key>
+  folder_id: <folder_id>
+  secret_key: <secret>
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: atlantis-tf-vars
+  namespace: app
+
+  # Создавал секрет через kubectl

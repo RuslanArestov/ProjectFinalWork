@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  key.json: <key_json>
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: infra-sa-key
+  namespace: app
+
+# Создавал секрет через kubectl

@@ -1,0 +1,19 @@
+apiVersion: v1
+data:
+  .terraformrc: |
+    provider_installation {
+      network_mirror {
+        url = "https://terraform-mirror.yandexcloud.net/"
+        include = ["registry.terraform.io/*/*"]
+      }
+      direct {
+        exclude = ["registry.terraform.io/*/*"]
+      }
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: atlantis-terraformrc
+  namespace: app
+
+# Создавал секрет через kubectl
